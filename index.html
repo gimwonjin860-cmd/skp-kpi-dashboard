@@ -724,6 +724,7 @@
         let charts = {};
         let monthlyData = {};
         let weeklyData = {};
+        let weeklyCACData = {}; // 주차별 CAC 데이터
 
         // 초기 로드
         window.onload = async function() {
@@ -735,6 +736,7 @@
         async function loadAllData() {
             await loadMonthlyData();
             await loadWeeklyData();
+            await loadWeeklyCACData();
             generateMonthlyTable(currentMonth);
             generateWeeklyData(currentWeeklyMonth);
             generateWeeklyCACData(currentWeeklyMonth);
@@ -794,6 +796,30 @@
             }
         }
 
+        // 주차별 CAC 데이터 로드
+        async function loadWeeklyCACData() {
+            const { data, error } = await supabaseClient
+                .from('weekly_cac')
+                .select('*')
+                .eq('year', 2026);
+            
+            if (data) {
+                weeklyCACData = {};
+                data.forEach(row => {
+                    if (!weeklyCACData[row.month]) {
+                        weeklyCACData[row.month] = {};
+                    }
+                    if (!weeklyCACData[row.month][row.week]) {
+                        weeklyCACData[row.month][row.week] = {};
+                    }
+                    weeklyCACData[row.month][row.week][row.channel] = {
+                        cost: row.cost,
+                        customers: row.customers
+                    };
+                });
+            }
+        }
+
         // 월별 데이터 저장
         async function saveMonthlyData() {
             const month = currentMonth;
@@ -820,6 +846,7 @@
             const month = currentWeeklyMonth;
             const weeks = weeklyData[month] || {};
             
+            // KPI 데이터 저장
             for (let week = 1; week <= 4; week++) {
                 if (weeks[week]) {
                     const { error} = await supabaseClient
@@ -832,8 +859,35 @@
                         }, { onConflict: 'year,month,week' });
                     
                     if (error) {
-                        alert('저장 실패: ' + error.message);
+                        alert('KPI 저장 실패: ' + error.message);
                         return;
+                    }
+                }
+            }
+            
+            // CAC 데이터 저장
+            const cacWeeks = weeklyCACData[month] || {};
+            const channels = ['instagram', 'sales', 'fair', 'organic'];
+            
+            for (let week = 1; week <= 4; week++) {
+                for (let channel of channels) {
+                    const cacData = cacWeeks[week]?.[channel];
+                    if (cacData) {
+                        const { error } = await supabaseClient
+                            .from('weekly_cac')
+                            .upsert({
+                                month: month,
+                                year: 2026,
+                                week: week,
+                                channel: channel,
+                                cost: cacData.cost || 0,
+                                customers: cacData.customers || 0
+                            }, { onConflict: 'year,month,week,channel' });
+                        
+                        if (error) {
+                            alert('CAC 저장 실패: ' + error.message);
+                            return;
+                        }
                     }
                 }
             }
@@ -1001,23 +1055,42 @@
                 { id: 'organic', name: '🌐 온라인', emoji: '🌐' }
             ];
 
+            if (!weeklyCACData[month]) weeklyCACData[month] = {};
+
             const container = document.getElementById('cac-weekly-container');
-            container.innerHTML = channels.map(channel => `
+            container.innerHTML = channels.map(channel => {
+                return `
                 <div class="cac-channel-row">
                     <div class="cac-channel-name">${channel.name}</div>
-                    ${[1,2,3,4].map(week => `
+                    ${[1,2,3,4].map(week => {
+                        const cost = weeklyCACData[month][week]?.[channel.id]?.cost || 0;
+                        const customers = weeklyCACData[month][week]?.[channel.id]?.customers || 0;
+                        return `
                         <div class="cac-input-wrapper">
                             <input type="number" class="cac-input" 
+                                value="${cost}"
+                                onchange="updateWeeklyCACValue(${month}, ${week}, '${channel.id}', 'cost', this.value)"
                                 placeholder="비용(만원)"
                                 title="${channel.name} ${week}주차 비용">
                             <span class="cac-label" style="text-align: center;">/ 전환수</span>
                             <input type="number" class="cac-input" 
+                                value="${customers}"
+                                onchange="updateWeeklyCACValue(${month}, ${week}, '${channel.id}', 'customers', this.value)"
                                 placeholder="전환"
                                 title="${channel.name} ${week}주차 전환수">
                         </div>
-                    `).join('')}
+                    `}).join('')}
                 </div>
-            `).join('');
+            `}).join('');
+        }
+
+        // 주차별 CAC 값 업데이트
+        function updateWeeklyCACValue(month, week, channel, field, value) {
+            if (!weeklyCACData[month]) weeklyCACData[month] = {};
+            if (!weeklyCACData[month][week]) weeklyCACData[month][week] = {};
+            if (!weeklyCACData[month][week][channel]) weeklyCACData[month][week][channel] = {};
+            
+            weeklyCACData[month][week][channel][field] = parseInt(value) || 0;
         }
 
         // 요약 카드 업데이트
