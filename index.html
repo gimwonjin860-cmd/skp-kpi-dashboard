@@ -109,6 +109,54 @@
             background: rgba(255,255,255,0.5);
         }
 
+        .annual-summary {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            margin-bottom: 2rem;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .annual-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--gray-900);
+        }
+
+        .annual-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .annual-card {
+            background: var(--gray-50);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .annual-label {
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .annual-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .annual-progress {
+            font-size: 0.875rem;
+            color: var(--gray-700);
+        }
+
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -342,112 +390,50 @@
             font-size: 1.125rem;
         }
 
-        .channel-card {
-            background: var(--gray-50);
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-            transition: all 0.3s ease;
+        .cac-week-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--gray-200);
         }
 
-        .channel-card:hover {
-            background: var(--gray-100);
-        }
-
-        .channel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .channel-name {
-            font-weight: 700;
-            font-size: 1.125rem;
-            color: var(--gray-900);
-        }
-
-        .cac-badge {
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 1rem;
-        }
-
-        .cac-badge.good {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .cac-badge.medium {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .cac-badge.poor {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .channel-inputs {
+        .cac-channel-row {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin-bottom: 1rem;
+            grid-template-columns: 100px repeat(4, 1fr);
+            gap: 0.5rem;
+            align-items: center;
+            padding: 0.75rem;
+            background: var(--gray-50);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
         }
 
-        .input-group {
+        .cac-channel-name {
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .cac-input-wrapper {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: 0.25rem;
         }
 
-        .input-label {
-            font-size: 0.75rem;
-            color: var(--gray-700);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .channel-input {
-            padding: 0.75rem;
+        .cac-input {
+            padding: 0.4rem;
             border: 2px solid var(--gray-200);
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
+            border-radius: 6px;
+            font-size: 0.75rem;
             text-align: center;
-            transition: all 0.3s ease;
         }
 
-        .channel-input:focus {
+        .cac-input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
-        .channel-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
+        .cac-label {
+            font-size: 0.65rem;
             color: var(--gray-700);
-            margin-bottom: 0.25rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-value {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--gray-900);
         }
 
         .hidden {
@@ -517,8 +503,7 @@
                 gap: 0.5rem;
             }
 
-            .channel-inputs,
-            .channel-stats {
+            .cac-channel-row {
                 grid-template-columns: 1fr;
             }
 
@@ -533,13 +518,39 @@
         <div class="header">
             <div>
                 <h1>스키프 KPI 대시보드</h1>
-                <div class="header-subtitle">2026년 성장 지표 실시간 추적 (Supabase 연동)</div>
+                <div class="header-subtitle">2026년 성장 지표 실시간 추적</div>
             </div>
             <div class="view-toggle">
                 <button class="toggle-btn active" onclick="switchView('monthly')">월별</button>
                 <button class="toggle-btn" onclick="switchView('weekly')">주차별</button>
                 <button class="toggle-btn" onclick="switchView('charts')">그래프</button>
-                <button class="toggle-btn" onclick="switchView('cac')">CAC 분석</button>
+            </div>
+        </div>
+
+        <!-- 2026년 연간 목표 -->
+        <div class="annual-summary">
+            <h2 class="annual-title">🎯 2026년 연간 목표</h2>
+            <div class="annual-grid">
+                <div class="annual-card">
+                    <div class="annual-label">연간 MRR 목표</div>
+                    <div class="annual-value" id="annual-mrr-target">2,000만원</div>
+                    <div class="annual-progress">12월까지 달성 목표</div>
+                </div>
+                <div class="annual-card">
+                    <div class="annual-label">현재 MRR 달성</div>
+                    <div class="annual-value" id="annual-mrr-actual">0만원</div>
+                    <div class="annual-progress" id="annual-mrr-progress">달성률: 0%</div>
+                </div>
+                <div class="annual-card">
+                    <div class="annual-label">총 브랜드 입점 목표</div>
+                    <div class="annual-value" id="annual-brands-target">10개사</div>
+                    <div class="annual-progress">12월까지 달성 목표</div>
+                </div>
+                <div class="annual-card">
+                    <div class="annual-label">현재 브랜드 입점</div>
+                    <div class="annual-value" id="annual-brands-actual">0개사</div>
+                    <div class="annual-progress" id="annual-brands-progress">달성률: 0%</div>
+                </div>
             </div>
         </div>
 
@@ -640,6 +651,29 @@
                 <div id="weekly-data-container">
                     <div class="loading">데이터 로딩중...</div>
                 </div>
+
+                <!-- 주차별 CAC 분석 -->
+                <div class="cac-week-section">
+                    <h3 class="section-title">💰 주차별 CAC 추적 (타이트하게)</h3>
+                    <div style="margin-bottom: 1rem; font-size: 0.875rem; color: var(--gray-700);">
+                        각 주차별로 채널당 비용/전환 입력
+                    </div>
+                    
+                    <div style="background: var(--gray-100); padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem;">
+                        <div style="display: grid; grid-template-columns: 100px repeat(4, 1fr); gap: 0.5rem; font-size: 0.75rem; font-weight: 600; color: var(--gray-700);">
+                            <div>채널</div>
+                            <div style="text-align: center;">1주차</div>
+                            <div style="text-align: center;">2주차</div>
+                            <div style="text-align: center;">3주차</div>
+                            <div style="text-align: center;">4주차</div>
+                        </div>
+                    </div>
+
+                    <div id="cac-weekly-container">
+                        <!-- JavaScript로 동적 생성 -->
+                    </div>
+                </div>
+
                 <button class="save-btn" onclick="saveWeeklyData()">💾 저장하기</button>
             </div>
         </div>
@@ -676,19 +710,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- CAC 분석 뷰 -->
-        <div id="cac-view" class="hidden">
-            <div class="section">
-                <h2 class="section-title">💰 채널별 CAC 분석</h2>
-                
-                <div id="cac-channels-container">
-                    <div class="loading">데이터 로딩중...</div>
-                </div>
-                
-                <button class="save-btn" onclick="saveCACData()">💾 저장하기</button>
-            </div>
-        </div>
     </div>
 
     <script>
@@ -703,7 +724,6 @@
         let charts = {};
         let monthlyData = {};
         let weeklyData = {};
-        let cacData = {};
 
         // 초기 로드
         window.onload = async function() {
@@ -715,11 +735,11 @@
         async function loadAllData() {
             await loadMonthlyData();
             await loadWeeklyData();
-            await loadCACData();
             generateMonthlyTable(currentMonth);
             generateWeeklyData(currentWeeklyMonth);
-            generateCACChannels();
+            generateWeeklyCACData(currentWeeklyMonth);
             updateSummaryCards();
+            updateAnnualSummary();
             updateCharts();
         }
 
@@ -774,20 +794,6 @@
             }
         }
 
-        // CAC 데이터 로드
-        async function loadCACData() {
-            const { data, error } = await supabaseClient
-                .from('cac_data')
-                .select('*');
-            
-            if (data) {
-                cacData = {};
-                data.forEach(row => {
-                    cacData[row.channel] = row;
-                });
-            }
-        }
-
         // 월별 데이터 저장
         async function saveMonthlyData() {
             const month = currentMonth;
@@ -816,7 +822,7 @@
             
             for (let week = 1; week <= 4; week++) {
                 if (weeks[week]) {
-                    const { error } = await supabaseClient
+                    const { error} = await supabaseClient
                         .from('weekly_kpi')
                         .upsert({
                             month: month,
@@ -836,24 +842,26 @@
             await loadAllData();
         }
 
-        // CAC 데이터 저장
-        async function saveCACData() {
-            for (let channel in cacData) {
-                const { error } = await supabaseClient
-                    .from('cac_data')
-                    .upsert({
-                        channel: channel,
-                        ...cacData[channel]
-                    }, { onConflict: 'channel' });
-                
-                if (error) {
-                    alert('저장 실패: ' + error.message);
-                    return;
+        // 2026년 연간 목표 업데이트
+        function updateAnnualSummary() {
+            let totalMRR = 0;
+            let totalBrands = 0;
+            
+            for (let month = 3; month <= 12; month++) {
+                if (monthlyData[month]) {
+                    totalMRR += monthlyData[month].mrr || 0;
+                    totalBrands += monthlyData[month].brands || 0;
                 }
             }
             
-            alert('저장 완료!');
-            await loadAllData();
+            const mrrTarget = 2000;
+            const brandsTarget = 10;
+            
+            document.getElementById('annual-mrr-actual').textContent = totalMRR + '만원';
+            document.getElementById('annual-mrr-progress').textContent = `달성률: ${Math.round((totalMRR / mrrTarget) * 100)}%`;
+            
+            document.getElementById('annual-brands-actual').textContent = totalBrands + '개사';
+            document.getElementById('annual-brands-progress').textContent = `달성률: ${Math.round((totalBrands / brandsTarget) * 100)}%`;
         }
 
         // 월별 테이블 생성
@@ -907,6 +915,7 @@
             monthlyData[month][fieldName] = parseInt(value) || 0;
             generateMonthlyTable(month);
             updateSummaryCards();
+            updateAnnualSummary();
             updateCharts();
         }
 
@@ -973,85 +982,40 @@
             
             generateWeeklyData(month);
             updateSummaryCards();
+            updateAnnualSummary();
             updateCharts();
         }
 
-        // CAC 채널 생성
-        function generateCACChannels() {
+        // 주차별 CAC 데이터 생성
+        function generateWeeklyCACData(month) {
             const channels = [
-                { id: 'instagram', name: '📸 인스타그램 광고', ltv: 60 },
-                { id: 'sales', name: '📞 전화/방문 영업', ltv: 60 },
-                { id: 'fair', name: '🎪 페어/전시회', ltv: 60 },
-                { id: 'organic', name: '🌐 온라인 자연 유입', ltv: 60 }
+                { id: 'instagram', name: '📸 인스타', emoji: '📸' },
+                { id: 'sales', name: '📞 영업', emoji: '📞' },
+                { id: 'fair', name: '🎪 페어', emoji: '🎪' },
+                { id: 'organic', name: '🌐 온라인', emoji: '🌐' }
             ];
 
-            const container = document.getElementById('cac-channels-container');
-            container.innerHTML = channels.map(channel => {
-                const data = cacData[channel.id] || { cost: 0, customers: 0, ltv: channel.ltv };
-                const cac = data.customers > 0 ? Math.round(data.cost / data.customers) : 0;
-                const ratio = cac > 0 ? (data.ltv / cac).toFixed(1) : 0;
-                
-                let badgeClass = 'poor';
-                let efficiency = '개선필요';
-                if (ratio >= 3) {
-                    badgeClass = 'good';
-                    efficiency = '우수';
-                } else if (ratio >= 2) {
-                    badgeClass = 'medium';
-                    efficiency = '양호';
-                }
-
-                return `
-                    <div class="channel-card">
-                        <div class="channel-header">
-                            <div class="channel-name">${channel.name}</div>
-                            <div class="cac-badge ${badgeClass}">CAC: ${cac}만원</div>
+            const container = document.getElementById('cac-weekly-container');
+            container.innerHTML = channels.map(channel => `
+                <div class="cac-channel-row">
+                    <div class="cac-channel-name">${channel.name}</div>
+                    ${[1,2,3,4].map(week => `
+                        <div class="cac-input-wrapper">
+                            <input type="number" class="cac-input" 
+                                placeholder="비용(만원)"
+                                title="${channel.name} ${week}주차 비용">
+                            <span class="cac-label" style="text-align: center;">/ 전환수</span>
+                            <input type="number" class="cac-input" 
+                                placeholder="전환"
+                                title="${channel.name} ${week}주차 전환수">
                         </div>
-                        <div class="channel-inputs">
-                            <div class="input-group">
-                                <label class="input-label">월 투입 비용 (만원)</label>
-                                <input type="number" class="channel-input" value="${data.cost}"
-                                    onchange="updateCACValue('${channel.id}', 'cost', this.value)">
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">전환 고객 수</label>
-                                <input type="number" class="channel-input" value="${data.customers}"
-                                    onchange="updateCACValue('${channel.id}', 'customers', this.value)">
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">LTV (만원)</label>
-                                <input type="number" class="channel-input" value="${data.ltv}"
-                                    onchange="updateCACValue('${channel.id}', 'ltv', this.value)">
-                            </div>
-                        </div>
-                        <div class="channel-stats">
-                            <div class="stat-item">
-                                <div class="stat-label">CAC</div>
-                                <div class="stat-value">${cac}만원</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-label">LTV/CAC</div>
-                                <div class="stat-value" style="color: var(--success);">${ratio}배</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-label">효율성</div>
-                                <div class="stat-value">${efficiency}</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function updateCACValue(channel, field, value) {
-            if (!cacData[channel]) cacData[channel] = {};
-            cacData[channel][field] = parseInt(value) || 0;
-            generateCACChannels();
+                    `).join('')}
+                </div>
+            `).join('');
         }
 
         // 요약 카드 업데이트
         function updateSummaryCards() {
-            // 현재 선택된 월 기준으로 표시
             const month = currentMonth;
             
             if (!monthlyData[month]) {
@@ -1211,7 +1175,7 @@
         }
 
         function switchView(view) {
-            const views = ['monthly-view', 'weekly-view', 'charts-view', 'cac-view'];
+            const views = ['monthly-view', 'weekly-view', 'charts-view'];
             const buttons = document.querySelectorAll('.toggle-btn');
 
             views.forEach(v => document.getElementById(v).classList.add('hidden'));
@@ -1231,17 +1195,18 @@
             monthBtns.forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
             generateMonthlyTable(month);
-            updateSummaryCards(); // 상단 카드도 업데이트
+            updateSummaryCards();
         }
 
         function selectWeeklyMonth(month) {
             currentWeeklyMonth = month;
-            currentMonth = month; // 주차별에서도 currentMonth 동기화
+            currentMonth = month;
             const weeklyBtns = document.querySelectorAll('#weekly-view .month-btn');
             weeklyBtns.forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
             generateWeeklyData(month);
-            updateSummaryCards(); // 상단 카드도 업데이트
+            generateWeeklyCACData(month);
+            updateSummaryCards();
         }
     </script>
 </body>
