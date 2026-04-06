@@ -595,6 +595,12 @@
                     <button class="month-btn" onclick="selectMonth(4)">4월</button>
                     <button class="month-btn" onclick="selectMonth(5)">5월</button>
                     <button class="month-btn" onclick="selectMonth(6)">6월</button>
+                    <button class="month-btn" onclick="selectMonth(7)">7월</button>
+                    <button class="month-btn" onclick="selectMonth(8)">8월</button>
+                    <button class="month-btn" onclick="selectMonth(9)">9월</button>
+                    <button class="month-btn" onclick="selectMonth(10)">10월</button>
+                    <button class="month-btn" onclick="selectMonth(11)">11월</button>
+                    <button class="month-btn" onclick="selectMonth(12)">12월</button>
                 </div>
 
                 <table class="data-table">
@@ -623,6 +629,12 @@
                     <button class="month-btn" onclick="selectWeeklyMonth(4)">4월</button>
                     <button class="month-btn" onclick="selectWeeklyMonth(5)">5월</button>
                     <button class="month-btn" onclick="selectWeeklyMonth(6)">6월</button>
+                    <button class="month-btn" onclick="selectWeeklyMonth(7)">7월</button>
+                    <button class="month-btn" onclick="selectWeeklyMonth(8)">8월</button>
+                    <button class="month-btn" onclick="selectWeeklyMonth(9)">9월</button>
+                    <button class="month-btn" onclick="selectWeeklyMonth(10)">10월</button>
+                    <button class="month-btn" onclick="selectWeeklyMonth(11)">11월</button>
+                    <button class="month-btn" onclick="selectWeeklyMonth(12)">12월</button>
                 </div>
 
                 <div id="weekly-data-container">
@@ -741,6 +753,24 @@
                     }
                     weeklyData[row.month][row.week] = row;
                 });
+                
+                // 주차별 데이터를 월별로 합산
+                for (let month in weeklyData) {
+                    if (!monthlyData[month]) monthlyData[month] = {};
+                    
+                    const metrics = ['mau', 'conversion', 'specbook', 'modeling', 'instagram'];
+                    metrics.forEach(key => {
+                        let total = 0;
+                        for (let week = 1; week <= 4; week++) {
+                            if (weeklyData[month][week] && weeklyData[month][week][key]) {
+                                total += weeklyData[month][week][key];
+                            }
+                        }
+                        if (total > 0) {
+                            monthlyData[month][key] = total;
+                        }
+                    });
+                }
             }
         }
 
@@ -930,7 +960,20 @@
             if (!weeklyData[month]) weeklyData[month] = {};
             if (!weeklyData[month][week]) weeklyData[month][week] = {};
             weeklyData[month][week][key] = parseInt(value) || 0;
+            
+            // 주차별 데이터를 월별로 합산
+            if (!monthlyData[month]) monthlyData[month] = {};
+            let total = 0;
+            for (let w = 1; w <= 4; w++) {
+                if (weeklyData[month][w] && weeklyData[month][w][key]) {
+                    total += weeklyData[month][w][key];
+                }
+            }
+            monthlyData[month][key] = total;
+            
             generateWeeklyData(month);
+            updateSummaryCards();
+            updateCharts();
         }
 
         // CAC 채널 생성
@@ -1008,30 +1051,38 @@
 
         // 요약 카드 업데이트
         function updateSummaryCards() {
-            const latestMonth = Math.max(...Object.keys(monthlyData).map(Number).filter(m => monthlyData[m]));
-            if (!latestMonth || !monthlyData[latestMonth]) return;
+            // 현재 선택된 월 기준으로 표시
+            const month = currentMonth;
+            
+            if (!monthlyData[month]) {
+                monthlyData[month] = {};
+            }
 
-            const data = monthlyData[latestMonth];
+            const data = monthlyData[month];
 
             document.getElementById('mau-summary').textContent = (data.mau || 0) + '명';
-            document.getElementById('mau-target-text').textContent = `목표: ${data.mau_target || 0}명`;
+            document.getElementById('mau-target-text').textContent = `2026년 ${month}월 목표: ${data.mau_target || 0}명`;
             const mauPercent = data.mau_target > 0 ? (data.mau / data.mau_target) * 100 : 0;
             document.getElementById('mau-progress').style.width = Math.min(mauPercent, 100) + '%';
+            document.getElementById('mau-change').textContent = `${month}월 실적`;
 
             document.getElementById('mrr-summary').textContent = (data.mrr || 0) + '만원';
-            document.getElementById('mrr-target-text').textContent = `목표: ${data.mrr_target || 0}만원`;
+            document.getElementById('mrr-target-text').textContent = `2026년 ${month}월 목표: ${data.mrr_target || 0}만원`;
             const mrrPercent = data.mrr_target > 0 ? (data.mrr / data.mrr_target) * 100 : 0;
             document.getElementById('mrr-progress').style.width = Math.min(mrrPercent, 100) + '%';
+            document.getElementById('mrr-change').textContent = `${month}월 실적`;
 
             document.getElementById('conversion-summary').textContent = (data.conversion || 0) + '건';
-            document.getElementById('conversion-target-text').textContent = `목표: ${data.conversion_target || 0}건`;
+            document.getElementById('conversion-target-text').textContent = `2026년 ${month}월 목표: ${data.conversion_target || 0}건`;
             const convPercent = data.conversion_target > 0 ? (data.conversion / data.conversion_target) * 100 : 0;
             document.getElementById('conversion-progress').style.width = Math.min(convPercent, 100) + '%';
+            document.getElementById('conversion-change').textContent = `${month}월 실적`;
 
             document.getElementById('brands-summary').textContent = (data.brands || 0) + '개사';
-            document.getElementById('brands-target-text').textContent = `목표: ${data.brands_target || 0}개사`;
+            document.getElementById('brands-target-text').textContent = `2026년 ${month}월 목표: ${data.brands_target || 0}개사`;
             const brandPercent = data.brands_target > 0 ? (data.brands / data.brands_target) * 100 : 0;
             document.getElementById('brands-progress').style.width = Math.min(brandPercent, 100) + '%';
+            document.getElementById('brands-change').textContent = `${month}월 실적`;
         }
 
         // 차트 생성
@@ -1049,17 +1100,17 @@
             charts.mau = new Chart(document.getElementById('mauChart'), {
                 ...chartConfig,
                 data: {
-                    labels: ['3월', '4월', '5월', '6월'],
+                    labels: ['3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
                     datasets: [{
                         label: '실적',
-                        data: [0, 0, 0, 0],
+                        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                         borderColor: '#667eea',
                         backgroundColor: 'rgba(102, 126, 234, 0.1)',
                         tension: 0.4,
                         fill: true
                     }, {
                         label: '목표',
-                        data: [0, 0, 0, 0],
+                        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                         borderColor: '#ef4444',
                         borderDash: [5, 5],
                         tension: 0.4
@@ -1070,17 +1121,17 @@
             charts.mrr = new Chart(document.getElementById('mrrChart'), {
                 ...chartConfig,
                 data: {
-                    labels: ['3월', '4월', '5월', '6월'],
+                    labels: ['3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
                     datasets: [{
                         label: '실적',
-                        data: [0, 0, 0, 0],
+                        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                         borderColor: '#10b981',
                         backgroundColor: 'rgba(16, 185, 129, 0.1)',
                         tension: 0.4,
                         fill: true
                     }, {
                         label: '목표',
-                        data: [0, 0, 0, 0],
+                        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                         borderColor: '#ef4444',
                         borderDash: [5, 5],
                         tension: 0.4
@@ -1091,17 +1142,17 @@
             charts.conversion = new Chart(document.getElementById('conversionChart'), {
                 ...chartConfig,
                 data: {
-                    labels: ['3월', '4월', '5월', '6월'],
+                    labels: ['3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
                     datasets: [{
                         label: '실적',
-                        data: [0, 0, 0, 0],
+                        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                         borderColor: '#f59e0b',
                         backgroundColor: 'rgba(245, 158, 11, 0.1)',
                         tension: 0.4,
                         fill: true
                     }, {
                         label: '목표',
-                        data: [0, 0, 0, 0],
+                        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                         borderColor: '#ef4444',
                         borderDash: [5, 5],
                         tension: 0.4
@@ -1112,10 +1163,10 @@
             charts.brands = new Chart(document.getElementById('brandsChart'), {
                 type: 'bar',
                 data: {
-                    labels: ['3월', '4월', '5월', '6월'],
+                    labels: ['3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
                     datasets: [{
                         label: '누적 입점',
-                        data: [0, 0, 0, 0],
+                        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                         backgroundColor: '#764ba2'
                     }]
                 },
@@ -1131,16 +1182,20 @@
         function updateCharts() {
             if (!charts.mau) return;
             
-            const months = [3, 4, 5, 6];
+            const months = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+            const labels = ['3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
             
+            charts.mau.data.labels = labels;
             charts.mau.data.datasets[0].data = months.map(m => monthlyData[m]?.mau || 0);
             charts.mau.data.datasets[1].data = months.map(m => monthlyData[m]?.mau_target || 0);
             charts.mau.update();
 
+            charts.mrr.data.labels = labels;
             charts.mrr.data.datasets[0].data = months.map(m => monthlyData[m]?.mrr || 0);
             charts.mrr.data.datasets[1].data = months.map(m => monthlyData[m]?.mrr_target || 0);
             charts.mrr.update();
 
+            charts.conversion.data.labels = labels;
             charts.conversion.data.datasets[0].data = months.map(m => monthlyData[m]?.conversion || 0);
             charts.conversion.data.datasets[1].data = months.map(m => monthlyData[m]?.conversion_target || 0);
             charts.conversion.update();
@@ -1150,6 +1205,7 @@
                 cumulative += monthlyData[m]?.brands || 0;
                 return cumulative;
             });
+            charts.brands.data.labels = labels;
             charts.brands.data.datasets[0].data = brandsCumulative;
             charts.brands.update();
         }
