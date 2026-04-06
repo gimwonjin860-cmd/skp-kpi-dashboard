@@ -1231,14 +1231,17 @@
             monthBtns.forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
             generateMonthlyTable(month);
+            updateSummaryCards(); // 상단 카드도 업데이트
         }
 
         function selectWeeklyMonth(month) {
             currentWeeklyMonth = month;
+            currentMonth = month; // 주차별에서도 currentMonth 동기화
             const weeklyBtns = document.querySelectorAll('#weekly-view .month-btn');
             weeklyBtns.forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
             generateWeeklyData(month);
+            updateSummaryCards(); // 상단 카드도 업데이트
         }
     </script>
 </body>
