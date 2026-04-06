@@ -533,8 +533,8 @@
             <div class="annual-grid">
                 <div class="annual-card">
                     <div class="annual-label">연간 MRR 목표</div>
-                    <div class="annual-value" id="annual-mrr-target">2,000만원</div>
-                    <div class="annual-progress">12월까지 달성 목표</div>
+                    <div class="annual-value" id="annual-mrr-target">0만원</div>
+                    <div class="annual-progress">3~12월 목표 합산</div>
                 </div>
                 <div class="annual-card">
                     <div class="annual-label">현재 MRR 달성</div>
@@ -543,8 +543,8 @@
                 </div>
                 <div class="annual-card">
                     <div class="annual-label">총 브랜드 입점 목표</div>
-                    <div class="annual-value" id="annual-brands-target">10개사</div>
-                    <div class="annual-progress">12월까지 달성 목표</div>
+                    <div class="annual-value" id="annual-brands-target">0개사</div>
+                    <div class="annual-progress">3~12월 목표 합산</div>
                 </div>
                 <div class="annual-card">
                     <div class="annual-label">현재 브랜드 입점</div>
@@ -845,23 +845,29 @@
         // 2026년 연간 목표 업데이트
         function updateAnnualSummary() {
             let totalMRR = 0;
+            let totalMRRTarget = 0;
             let totalBrands = 0;
+            let totalBrandsTarget = 0;
             
             for (let month = 3; month <= 12; month++) {
                 if (monthlyData[month]) {
                     totalMRR += monthlyData[month].mrr || 0;
+                    totalMRRTarget += monthlyData[month].mrr_target || 0;
                     totalBrands += monthlyData[month].brands || 0;
+                    totalBrandsTarget += monthlyData[month].brands_target || 0;
                 }
             }
             
-            const mrrTarget = 2000;
-            const brandsTarget = 10;
-            
+            // 연간 목표는 월별 목표의 합산
+            document.getElementById('annual-mrr-target').textContent = totalMRRTarget + '만원';
             document.getElementById('annual-mrr-actual').textContent = totalMRR + '만원';
-            document.getElementById('annual-mrr-progress').textContent = `달성률: ${Math.round((totalMRR / mrrTarget) * 100)}%`;
+            const mrrPercent = totalMRRTarget > 0 ? Math.round((totalMRR / totalMRRTarget) * 100) : 0;
+            document.getElementById('annual-mrr-progress').textContent = `달성률: ${mrrPercent}%`;
             
+            document.getElementById('annual-brands-target').textContent = totalBrandsTarget + '개사';
             document.getElementById('annual-brands-actual').textContent = totalBrands + '개사';
-            document.getElementById('annual-brands-progress').textContent = `달성률: ${Math.round((totalBrands / brandsTarget) * 100)}%`;
+            const brandsPercent = totalBrandsTarget > 0 ? Math.round((totalBrands / totalBrandsTarget) * 100) : 0;
+            document.getElementById('annual-brands-progress').textContent = `달성률: ${brandsPercent}%`;
         }
 
         // 월별 테이블 생성
