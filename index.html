@@ -6,6 +6,7 @@
     <title>스키프 KPI 대시보드</title>
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -269,6 +270,28 @@
             font-size: 1rem;
         }
 
+        .save-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .save-btn:active {
+            transform: translateY(0);
+        }
+
         .weekly-grid {
             display: grid;
             gap: 1rem;
@@ -472,6 +495,12 @@
             gap: 2rem;
         }
 
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray-700);
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 1rem;
@@ -504,7 +533,7 @@
         <div class="header">
             <div>
                 <h1>스키프 KPI 대시보드</h1>
-                <div class="header-subtitle">2026년 성장 지표 실시간 추적</div>
+                <div class="header-subtitle">2026년 성장 지표 실시간 추적 (Supabase 연동)</div>
             </div>
             <div class="view-toggle">
                 <button class="toggle-btn active" onclick="switchView('monthly')">월별</button>
@@ -518,7 +547,7 @@
         <div class="metrics-grid">
             <div class="metric-card">
                 <div class="metric-label">MAU (월간 활성 사용자)</div>
-                <div class="metric-value" id="mau-summary">0명</div>
+                <div class="metric-value" id="mau-summary">로딩중...</div>
                 <div class="metric-target" id="mau-target-text">목표: -</div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="mau-progress" style="width: 0%"></div>
@@ -528,7 +557,7 @@
 
             <div class="metric-card">
                 <div class="metric-label">MRR (월 반복 매출)</div>
-                <div class="metric-value" id="mrr-summary">0원</div>
+                <div class="metric-value" id="mrr-summary">로딩중...</div>
                 <div class="metric-target" id="mrr-target-text">목표: -</div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="mrr-progress" style="width: 0%"></div>
@@ -538,7 +567,7 @@
 
             <div class="metric-card">
                 <div class="metric-label">유료 전환 고객</div>
-                <div class="metric-value" id="conversion-summary">0건</div>
+                <div class="metric-value" id="conversion-summary">로딩중...</div>
                 <div class="metric-target" id="conversion-target-text">목표: -</div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="conversion-progress" style="width: 0%"></div>
@@ -548,7 +577,7 @@
 
             <div class="metric-card">
                 <div class="metric-label">브랜드 입점</div>
-                <div class="metric-value" id="brands-summary">0개사</div>
+                <div class="metric-value" id="brands-summary">로딩중...</div>
                 <div class="metric-target" id="brands-target-text">목표: -</div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="brands-progress" style="width: 0%"></div>
@@ -578,9 +607,10 @@
                         </tr>
                     </thead>
                     <tbody id="monthly-table-body">
-                        <!-- JavaScript로 동적 생성 -->
+                        <tr><td colspan="4" class="loading">데이터 로딩중...</td></tr>
                     </tbody>
                 </table>
+                <button class="save-btn" onclick="saveMonthlyData()">💾 저장하기</button>
             </div>
         </div>
 
@@ -596,8 +626,9 @@
                 </div>
 
                 <div id="weekly-data-container">
-                    <!-- JavaScript로 동적 생성 -->
+                    <div class="loading">데이터 로딩중...</div>
                 </div>
+                <button class="save-btn" onclick="saveWeeklyData()">💾 저장하기</button>
             </div>
         </div>
 
@@ -639,184 +670,161 @@
             <div class="section">
                 <h2 class="section-title">💰 채널별 CAC 분석</h2>
                 
-                <div class="channel-card">
-                    <div class="channel-header">
-                        <div class="channel-name">📸 인스타그램 광고</div>
-                        <div class="cac-badge" id="cac-instagram-badge">CAC: -</div>
-                    </div>
-                    <div class="channel-inputs">
-                        <div class="input-group">
-                            <label class="input-label">월 투입 비용 (만원)</label>
-                            <input type="number" class="channel-input" id="instagram-cost" 
-                                   placeholder="100" oninput="calculateCAC('instagram')">
-                        </div>
-                        <div class="input-group">
-                            <label class="input-label">전환 고객 수</label>
-                            <input type="number" class="channel-input" id="instagram-customers" 
-                                   placeholder="20" oninput="calculateCAC('instagram')">
-                        </div>
-                        <div class="input-group">
-                            <label class="input-label">LTV (만원)</label>
-                            <input type="number" class="channel-input" id="instagram-ltv" 
-                                   placeholder="60" oninput="calculateCAC('instagram')">
-                        </div>
-                    </div>
-                    <div class="channel-stats">
-                        <div class="stat-item">
-                            <div class="stat-label">CAC</div>
-                            <div class="stat-value" id="instagram-cac">-</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">LTV/CAC</div>
-                            <div class="stat-value" id="instagram-ratio" style="color: var(--success);">-</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">효율성</div>
-                            <div class="stat-value" id="instagram-efficiency">-</div>
-                        </div>
-                    </div>
+                <div id="cac-channels-container">
+                    <div class="loading">데이터 로딩중...</div>
                 </div>
-
-                <div class="channel-card">
-                    <div class="channel-header">
-                        <div class="channel-name">📞 전화/방문 영업</div>
-                        <div class="cac-badge" id="cac-sales-badge">CAC: -</div>
-                    </div>
-                    <div class="channel-inputs">
-                        <div class="input-group">
-                            <label class="input-label">월 투입 비용 (만원)</label>
-                            <input type="number" class="channel-input" id="sales-cost" 
-                                   placeholder="150" oninput="calculateCAC('sales')">
-                        </div>
-                        <div class="input-group">
-                            <label class="input-label">전환 고객 수</label>
-                            <input type="number" class="channel-input" id="sales-customers" 
-                                   placeholder="5" oninput="calculateCAC('sales')">
-                        </div>
-                        <div class="input-group">
-                            <label class="input-label">LTV (만원)</label>
-                            <input type="number" class="channel-input" id="sales-ltv" 
-                                   placeholder="60" oninput="calculateCAC('sales')">
-                        </div>
-                    </div>
-                    <div class="channel-stats">
-                        <div class="stat-item">
-                            <div class="stat-label">CAC</div>
-                            <div class="stat-value" id="sales-cac">-</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">LTV/CAC</div>
-                            <div class="stat-value" id="sales-ratio">-</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">효율성</div>
-                            <div class="stat-value" id="sales-efficiency">-</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="channel-card">
-                    <div class="channel-header">
-                        <div class="channel-name">🎪 페어/전시회</div>
-                        <div class="cac-badge" id="cac-fair-badge">CAC: -</div>
-                    </div>
-                    <div class="channel-inputs">
-                        <div class="input-group">
-                            <label class="input-label">분기 투입 비용 (만원)</label>
-                            <input type="number" class="channel-input" id="fair-cost" 
-                                   placeholder="300" oninput="calculateCAC('fair')">
-                        </div>
-                        <div class="input-group">
-                            <label class="input-label">전환 고객 수</label>
-                            <input type="number" class="channel-input" id="fair-customers" 
-                                   placeholder="15" oninput="calculateCAC('fair')">
-                        </div>
-                        <div class="input-group">
-                            <label class="input-label">LTV (만원)</label>
-                            <input type="number" class="channel-input" id="fair-ltv" 
-                                   placeholder="60" oninput="calculateCAC('fair')">
-                        </div>
-                    </div>
-                    <div class="channel-stats">
-                        <div class="stat-item">
-                            <div class="stat-label">CAC</div>
-                            <div class="stat-value" id="fair-cac">-</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">LTV/CAC</div>
-                            <div class="stat-value" id="fair-ratio">-</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">효율성</div>
-                            <div class="stat-value" id="fair-efficiency">-</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="channel-card">
-                    <div class="channel-header">
-                        <div class="channel-name">🌐 온라인 자연 유입</div>
-                        <div class="cac-badge" id="cac-organic-badge">CAC: -</div>
-                    </div>
-                    <div class="channel-inputs">
-                        <div class="input-group">
-                            <label class="input-label">월 투입 비용 (만원)</label>
-                            <input type="number" class="channel-input" id="organic-cost" 
-                                   placeholder="50" oninput="calculateCAC('organic')">
-                        </div>
-                        <div class="input-group">
-                            <label class="input-label">전환 고객 수</label>
-                            <input type="number" class="channel-input" id="organic-customers" 
-                                   placeholder="10" oninput="calculateCAC('organic')">
-                        </div>
-                        <div class="input-group">
-                            <label class="input-label">LTV (만원)</label>
-                            <input type="number" class="channel-input" id="organic-ltv" 
-                                   placeholder="60" oninput="calculateCAC('organic')">
-                        </div>
-                    </div>
-                    <div class="channel-stats">
-                        <div class="stat-item">
-                            <div class="stat-label">CAC</div>
-                            <div class="stat-value" id="organic-cac">-</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">LTV/CAC</div>
-                            <div class="stat-value" id="organic-ratio">-</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">효율성</div>
-                            <div class="stat-value" id="organic-efficiency">-</div>
-                        </div>
-                    </div>
-                </div>
+                
+                <button class="save-btn" onclick="saveCACData()">💾 저장하기</button>
             </div>
         </div>
     </div>
 
     <script>
-        // 데이터 저장소
-        const monthlyData = {
-            3: { mau: 0, mauTarget: 0, mrr: 0, mrrTarget: 0, conversion: 0, conversionTarget: 0, brands: 0, brandsTarget: 0, 
-                 instagram: 0, sales: 0, signup: 0, specbook: 0, modeling: 0 },
-            4: { mau: 0, mauTarget: 0, mrr: 0, mrrTarget: 0, conversion: 0, conversionTarget: 0, brands: 0, brandsTarget: 0,
-                 instagram: 0, sales: 0, signup: 0, specbook: 0, modeling: 0 },
-            5: { mau: 0, mauTarget: 0, mrr: 0, mrrTarget: 0, conversion: 0, conversionTarget: 0, brands: 0, brandsTarget: 0,
-                 instagram: 0, sales: 0, signup: 0, specbook: 0, modeling: 0 },
-            6: { mau: 0, mauTarget: 0, mrr: 0, mrrTarget: 0, conversion: 0, conversionTarget: 0, brands: 0, brandsTarget: 0,
-                 instagram: 0, sales: 0, signup: 0, specbook: 0, modeling: 0, fair: 0 }
-        };
-
-        const weeklyData = {
-            3: { mau: [0,0,0,0], conversion: [0,0,0,0], specbook: [0,0,0,0], modeling: [0,0,0,0], instagram: [0,0,0,0] },
-            4: { mau: [0,0,0,0], conversion: [0,0,0,0], specbook: [0,0,0,0], modeling: [0,0,0,0], instagram: [0,0,0,0] },
-            5: { mau: [0,0,0,0], conversion: [0,0,0,0], specbook: [0,0,0,0], modeling: [0,0,0,0], instagram: [0,0,0,0] },
-            6: { mau: [0,0,0,0], conversion: [0,0,0,0], specbook: [0,0,0,0], modeling: [0,0,0,0], instagram: [0,0,0,0] }
-        };
+        // Supabase 클라이언트 초기화
+        const supabaseClient = window.supabase.createClient(
+            'https://kaamwiwevlwamykpyvjm.supabase.co',
+            'sb_publishable_3gUzJtIdwYXjcnfumH_bmQ_CamvZhmt'
+        );
 
         let currentMonth = 3;
         let currentWeeklyMonth = 3;
         let charts = {};
+        let monthlyData = {};
+        let weeklyData = {};
+        let cacData = {};
+
+        // 초기 로드
+        window.onload = async function() {
+            await loadAllData();
+            createCharts();
+        };
+
+        // 모든 데이터 로드
+        async function loadAllData() {
+            await loadMonthlyData();
+            await loadWeeklyData();
+            await loadCACData();
+            generateMonthlyTable(currentMonth);
+            generateWeeklyData(currentWeeklyMonth);
+            generateCACChannels();
+            updateSummaryCards();
+            updateCharts();
+        }
+
+        // 월별 데이터 로드
+        async function loadMonthlyData() {
+            const { data, error } = await supabaseClient
+                .from('monthly_kpi')
+                .select('*')
+                .eq('year', 2026);
+            
+            if (data) {
+                monthlyData = {};
+                data.forEach(row => {
+                    monthlyData[row.month] = row;
+                });
+            }
+        }
+
+        // 주차별 데이터 로드
+        async function loadWeeklyData() {
+            const { data, error } = await supabaseClient
+                .from('weekly_kpi')
+                .select('*')
+                .eq('year', 2026);
+            
+            if (data) {
+                weeklyData = {};
+                data.forEach(row => {
+                    if (!weeklyData[row.month]) {
+                        weeklyData[row.month] = {};
+                    }
+                    weeklyData[row.month][row.week] = row;
+                });
+            }
+        }
+
+        // CAC 데이터 로드
+        async function loadCACData() {
+            const { data, error } = await supabaseClient
+                .from('cac_data')
+                .select('*');
+            
+            if (data) {
+                cacData = {};
+                data.forEach(row => {
+                    cacData[row.channel] = row;
+                });
+            }
+        }
+
+        // 월별 데이터 저장
+        async function saveMonthlyData() {
+            const month = currentMonth;
+            const data = monthlyData[month] || {};
+            
+            const { error } = await supabaseClient
+                .from('monthly_kpi')
+                .upsert({
+                    month: month,
+                    year: 2026,
+                    ...data
+                }, { onConflict: 'year,month' });
+            
+            if (error) {
+                alert('저장 실패: ' + error.message);
+            } else {
+                alert('저장 완료!');
+                await loadAllData();
+            }
+        }
+
+        // 주차별 데이터 저장
+        async function saveWeeklyData() {
+            const month = currentWeeklyMonth;
+            const weeks = weeklyData[month] || {};
+            
+            for (let week = 1; week <= 4; week++) {
+                if (weeks[week]) {
+                    const { error } = await supabaseClient
+                        .from('weekly_kpi')
+                        .upsert({
+                            month: month,
+                            year: 2026,
+                            week: week,
+                            ...weeks[week]
+                        }, { onConflict: 'year,month,week' });
+                    
+                    if (error) {
+                        alert('저장 실패: ' + error.message);
+                        return;
+                    }
+                }
+            }
+            
+            alert('저장 완료!');
+            await loadAllData();
+        }
+
+        // CAC 데이터 저장
+        async function saveCACData() {
+            for (let channel in cacData) {
+                const { error } = await supabaseClient
+                    .from('cac_data')
+                    .upsert({
+                        channel: channel,
+                        ...cacData[channel]
+                    }, { onConflict: 'channel' });
+                
+                if (error) {
+                    alert('저장 실패: ' + error.message);
+                    return;
+                }
+            }
+            
+            alert('저장 완료!');
+            await loadAllData();
+        }
 
         // 월별 테이블 생성
         function generateMonthlyTable(month) {
@@ -836,35 +844,44 @@
                 metrics.push({ key: 'fair', label: '페어 명함', unit: '개' });
             }
 
+            if (!monthlyData[month]) {
+                monthlyData[month] = {};
+            }
+
             const tbody = document.getElementById('monthly-table-body');
             tbody.innerHTML = '';
 
             metrics.forEach(metric => {
                 const row = document.createElement('tr');
                 const actual = monthlyData[month][metric.key] || 0;
-                const target = monthlyData[month][metric.key + 'Target'] || 0;
+                const target = monthlyData[month][metric.key + '_target'] || 0;
                 const achievement = target > 0 ? Math.round((actual / target) * 100) : 0;
 
                 row.innerHTML = `
                     <td><strong>${metric.label}</strong></td>
                     <td><input type="number" value="${actual}" 
-                        oninput="updateMonthlyData(${month}, '${metric.key}', this.value, false)" 
+                        onchange="updateMonthlyValue(${month}, '${metric.key}', this.value, false)" 
                         style="width: 100%; padding: 0.5rem; border: 2px solid var(--gray-200); border-radius: 8px; text-align: center;"></td>
                     <td><input type="number" value="${target}" 
-                        oninput="updateMonthlyData(${month}, '${metric.key}', this.value, true)" 
+                        onchange="updateMonthlyValue(${month}, '${metric.key}', this.value, true)" 
                         style="width: 100%; padding: 0.5rem; border: 2px solid var(--gray-200); border-radius: 8px; text-align: center;"></td>
                     <td class="total-cell">${achievement}%</td>
                 `;
                 tbody.appendChild(row);
             });
+        }
 
+        function updateMonthlyValue(month, key, value, isTarget) {
+            if (!monthlyData[month]) monthlyData[month] = {};
+            const fieldName = isTarget ? key + '_target' : key;
+            monthlyData[month][fieldName] = parseInt(value) || 0;
+            generateMonthlyTable(month);
             updateSummaryCards();
             updateCharts();
         }
 
         // 주차별 데이터 생성
         function generateWeeklyData(month) {
-            const container = document.getElementById('weekly-data-container');
             const metrics = [
                 { key: 'mau', label: 'MAU' },
                 { key: 'conversion', label: '유료 전환' },
@@ -873,6 +890,9 @@
                 { key: 'instagram', label: '인스타 팔로워 증가' }
             ];
 
+            if (!weeklyData[month]) weeklyData[month] = {};
+
+            const container = document.getElementById('weekly-data-container');
             container.innerHTML = `
                 <div class="weekly-grid">
                     <div class="week-row">
@@ -883,109 +903,135 @@
                         <div style="font-weight: 600; text-align: center;">4주차</div>
                         <div style="font-weight: 600; text-align: center;">합계</div>
                     </div>
-                    ${metrics.map(metric => `
+                    ${metrics.map(metric => {
+                        let total = 0;
+                        const weekValues = [];
+                        for (let week = 1; week <= 4; week++) {
+                            const val = weeklyData[month][week]?.[metric.key] || 0;
+                            weekValues.push(val);
+                            total += val;
+                        }
+                        return `
                         <div class="week-row">
                             <div class="week-label">${metric.label}</div>
-                            ${[0,1,2,3].map(week => `
-                                <input type="number" class="week-input" value="${weeklyData[month][metric.key][week]}"
-                                    oninput="updateWeeklyData(${month}, '${metric.key}', ${week}, this.value)"
+                            ${weekValues.map((val, idx) => `
+                                <input type="number" class="week-input" value="${val}"
+                                    onchange="updateWeeklyValue(${month}, ${idx + 1}, '${metric.key}', this.value)"
                                     placeholder="0">
                             `).join('')}
-                            <div class="week-total" id="weekly-${metric.key}-total">${weeklyData[month][metric.key].reduce((a,b) => a+b, 0)}</div>
+                            <div class="week-total">${total}</div>
                         </div>
-                    `).join('')}
+                    `}).join('')}
                 </div>
             `;
         }
 
-        // 월별 데이터 업데이트
-        function updateMonthlyData(month, key, value, isTarget) {
-            const numValue = parseFloat(value) || 0;
-            if (isTarget) {
-                monthlyData[month][key + 'Target'] = numValue;
-            } else {
-                monthlyData[month][key] = numValue;
-            }
-            generateMonthlyTable(month);
+        function updateWeeklyValue(month, week, key, value) {
+            if (!weeklyData[month]) weeklyData[month] = {};
+            if (!weeklyData[month][week]) weeklyData[month][week] = {};
+            weeklyData[month][week][key] = parseInt(value) || 0;
+            generateWeeklyData(month);
         }
 
-        // 주차별 데이터 업데이트
-        function updateWeeklyData(month, key, week, value) {
-            weeklyData[month][key][week] = parseFloat(value) || 0;
-            const total = weeklyData[month][key].reduce((a,b) => a+b, 0);
-            document.getElementById(`weekly-${key}-total`).textContent = total;
-            
-            // 월별 데이터에도 반영
-            monthlyData[month][key] = total;
-            updateSummaryCards();
-            updateCharts();
+        // CAC 채널 생성
+        function generateCACChannels() {
+            const channels = [
+                { id: 'instagram', name: '📸 인스타그램 광고', ltv: 60 },
+                { id: 'sales', name: '📞 전화/방문 영업', ltv: 60 },
+                { id: 'fair', name: '🎪 페어/전시회', ltv: 60 },
+                { id: 'organic', name: '🌐 온라인 자연 유입', ltv: 60 }
+            ];
+
+            const container = document.getElementById('cac-channels-container');
+            container.innerHTML = channels.map(channel => {
+                const data = cacData[channel.id] || { cost: 0, customers: 0, ltv: channel.ltv };
+                const cac = data.customers > 0 ? Math.round(data.cost / data.customers) : 0;
+                const ratio = cac > 0 ? (data.ltv / cac).toFixed(1) : 0;
+                
+                let badgeClass = 'poor';
+                let efficiency = '개선필요';
+                if (ratio >= 3) {
+                    badgeClass = 'good';
+                    efficiency = '우수';
+                } else if (ratio >= 2) {
+                    badgeClass = 'medium';
+                    efficiency = '양호';
+                }
+
+                return `
+                    <div class="channel-card">
+                        <div class="channel-header">
+                            <div class="channel-name">${channel.name}</div>
+                            <div class="cac-badge ${badgeClass}">CAC: ${cac}만원</div>
+                        </div>
+                        <div class="channel-inputs">
+                            <div class="input-group">
+                                <label class="input-label">월 투입 비용 (만원)</label>
+                                <input type="number" class="channel-input" value="${data.cost}"
+                                    onchange="updateCACValue('${channel.id}', 'cost', this.value)">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">전환 고객 수</label>
+                                <input type="number" class="channel-input" value="${data.customers}"
+                                    onchange="updateCACValue('${channel.id}', 'customers', this.value)">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">LTV (만원)</label>
+                                <input type="number" class="channel-input" value="${data.ltv}"
+                                    onchange="updateCACValue('${channel.id}', 'ltv', this.value)">
+                            </div>
+                        </div>
+                        <div class="channel-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">CAC</div>
+                                <div class="stat-value">${cac}만원</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">LTV/CAC</div>
+                                <div class="stat-value" style="color: var(--success);">${ratio}배</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">효율성</div>
+                                <div class="stat-value">${efficiency}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateCACValue(channel, field, value) {
+            if (!cacData[channel]) cacData[channel] = {};
+            cacData[channel][field] = parseInt(value) || 0;
+            generateCACChannels();
         }
 
         // 요약 카드 업데이트
         function updateSummaryCards() {
-            const monthsWithData = Object.keys(monthlyData).map(Number).filter(m => monthlyData[m] && (monthlyData[m].mau > 0 || monthlyData[m].mauTarget > 0));
-            const latestMonth = monthsWithData.length > 0 ? Math.max(...monthsWithData) : currentMonth;
-            
-            if (!monthlyData[latestMonth]) return;
+            const latestMonth = Math.max(...Object.keys(monthlyData).map(Number).filter(m => monthlyData[m]));
+            if (!latestMonth || !monthlyData[latestMonth]) return;
 
             const data = monthlyData[latestMonth];
 
-            // MAU
-            document.getElementById('mau-summary').textContent = data.mau + '명';
-            document.getElementById('mau-target-text').textContent = `목표: ${data.mauTarget}명`;
-            const mauPercent = data.mauTarget > 0 ? (data.mau / data.mauTarget) * 100 : 0;
+            document.getElementById('mau-summary').textContent = (data.mau || 0) + '명';
+            document.getElementById('mau-target-text').textContent = `목표: ${data.mau_target || 0}명`;
+            const mauPercent = data.mau_target > 0 ? (data.mau / data.mau_target) * 100 : 0;
             document.getElementById('mau-progress').style.width = Math.min(mauPercent, 100) + '%';
-            document.getElementById('mau-change').textContent = `${latestMonth}월 실적`;
 
-            // MRR
-            document.getElementById('mrr-summary').textContent = data.mrr + '만원';
-            document.getElementById('mrr-target-text').textContent = `목표: ${data.mrrTarget}만원`;
-            const mrrPercent = data.mrrTarget > 0 ? (data.mrr / data.mrrTarget) * 100 : 0;
+            document.getElementById('mrr-summary').textContent = (data.mrr || 0) + '만원';
+            document.getElementById('mrr-target-text').textContent = `목표: ${data.mrr_target || 0}만원`;
+            const mrrPercent = data.mrr_target > 0 ? (data.mrr / data.mrr_target) * 100 : 0;
             document.getElementById('mrr-progress').style.width = Math.min(mrrPercent, 100) + '%';
-            document.getElementById('mrr-change').textContent = `${latestMonth}월 실적`;
 
-            // 유료 전환
-            document.getElementById('conversion-summary').textContent = data.conversion + '건';
-            document.getElementById('conversion-target-text').textContent = `목표: ${data.conversionTarget}건`;
-            const convPercent = data.conversionTarget > 0 ? (data.conversion / data.conversionTarget) * 100 : 0;
+            document.getElementById('conversion-summary').textContent = (data.conversion || 0) + '건';
+            document.getElementById('conversion-target-text').textContent = `목표: ${data.conversion_target || 0}건`;
+            const convPercent = data.conversion_target > 0 ? (data.conversion / data.conversion_target) * 100 : 0;
             document.getElementById('conversion-progress').style.width = Math.min(convPercent, 100) + '%';
-            document.getElementById('conversion-change').textContent = `${latestMonth}월 실적`;
 
-            // 브랜드
-            document.getElementById('brands-summary').textContent = data.brands + '개사';
-            document.getElementById('brands-target-text').textContent = `목표: ${data.brandsTarget}개사`;
-            const brandPercent = data.brandsTarget > 0 ? (data.brands / data.brandsTarget) * 100 : 0;
+            document.getElementById('brands-summary').textContent = (data.brands || 0) + '개사';
+            document.getElementById('brands-target-text').textContent = `목표: ${data.brands_target || 0}개사`;
+            const brandPercent = data.brands_target > 0 ? (data.brands / data.brands_target) * 100 : 0;
             document.getElementById('brands-progress').style.width = Math.min(brandPercent, 100) + '%';
-            document.getElementById('brands-change').textContent = `${latestMonth}월 실적`;
-        }
-
-        // CAC 계산
-        function calculateCAC(channel) {
-            const cost = parseFloat(document.getElementById(`${channel}-cost`).value) || 0;
-            const customers = parseFloat(document.getElementById(`${channel}-customers`).value) || 0;
-            const ltv = parseFloat(document.getElementById(`${channel}-ltv`).value) || 0;
-
-            const cac = customers > 0 ? Math.round(cost / customers) : 0;
-            const ratio = cac > 0 ? (ltv / cac).toFixed(1) : 0;
-
-            document.getElementById(`${channel}-cac`).textContent = cac + '만원';
-            document.getElementById(`${channel}-ratio`).textContent = ratio + '배';
-
-            // 효율성 판정
-            let efficiency = '개선필요';
-            let badgeClass = 'poor';
-            if (ratio >= 3) {
-                efficiency = '우수';
-                badgeClass = 'good';
-            } else if (ratio >= 2) {
-                efficiency = '양호';
-                badgeClass = 'medium';
-            }
-
-            document.getElementById(`${channel}-efficiency`).textContent = efficiency;
-            const badge = document.getElementById(`cac-${channel}-badge`);
-            badge.textContent = `CAC: ${cac}만원`;
-            badge.className = 'cac-badge ' + badgeClass;
         }
 
         // 차트 생성
@@ -995,20 +1041,11 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
+                    plugins: { legend: { display: true } },
+                    scales: { y: { beginAtZero: true } }
                 }
             };
 
-            // MAU 차트
             charts.mau = new Chart(document.getElementById('mauChart'), {
                 ...chartConfig,
                 data: {
@@ -1030,7 +1067,6 @@
                 }
             });
 
-            // MRR 차트
             charts.mrr = new Chart(document.getElementById('mrrChart'), {
                 ...chartConfig,
                 data: {
@@ -1052,7 +1088,6 @@
                 }
             });
 
-            // 유료 전환 차트
             charts.conversion = new Chart(document.getElementById('conversionChart'), {
                 ...chartConfig,
                 data: {
@@ -1074,7 +1109,6 @@
                 }
             });
 
-            // 브랜드 차트
             charts.brands = new Chart(document.getElementById('brandsChart'), {
                 type: 'bar',
                 data: {
@@ -1088,51 +1122,38 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
                 }
             });
         }
 
-        // 차트 업데이트
         function updateCharts() {
-            if (!charts.mau) return; // 차트가 아직 생성되지 않았으면 리턴
+            if (!charts.mau) return;
             
             const months = [3, 4, 5, 6];
             
-            charts.mau.data.datasets[0].data = months.map(m => monthlyData[m] ? monthlyData[m].mau : 0);
-            charts.mau.data.datasets[1].data = months.map(m => monthlyData[m] ? monthlyData[m].mauTarget : 0);
+            charts.mau.data.datasets[0].data = months.map(m => monthlyData[m]?.mau || 0);
+            charts.mau.data.datasets[1].data = months.map(m => monthlyData[m]?.mau_target || 0);
             charts.mau.update();
 
-            charts.mrr.data.datasets[0].data = months.map(m => monthlyData[m] ? monthlyData[m].mrr : 0);
-            charts.mrr.data.datasets[1].data = months.map(m => monthlyData[m] ? monthlyData[m].mrrTarget : 0);
+            charts.mrr.data.datasets[0].data = months.map(m => monthlyData[m]?.mrr || 0);
+            charts.mrr.data.datasets[1].data = months.map(m => monthlyData[m]?.mrr_target || 0);
             charts.mrr.update();
 
-            charts.conversion.data.datasets[0].data = months.map(m => monthlyData[m] ? monthlyData[m].conversion : 0);
-            charts.conversion.data.datasets[1].data = months.map(m => monthlyData[m] ? monthlyData[m].conversionTarget : 0);
+            charts.conversion.data.datasets[0].data = months.map(m => monthlyData[m]?.conversion || 0);
+            charts.conversion.data.datasets[1].data = months.map(m => monthlyData[m]?.conversion_target || 0);
             charts.conversion.update();
 
-            // 브랜드는 누적
             let cumulative = 0;
             const brandsCumulative = months.map(m => {
-                if (monthlyData[m]) {
-                    cumulative += monthlyData[m].brands;
-                }
+                cumulative += monthlyData[m]?.brands || 0;
                 return cumulative;
             });
             charts.brands.data.datasets[0].data = brandsCumulative;
             charts.brands.update();
         }
 
-        // 뷰 전환
         function switchView(view) {
             const views = ['monthly-view', 'weekly-view', 'charts-view', 'cac-view'];
             const buttons = document.querySelectorAll('.toggle-btn');
@@ -1163,13 +1184,6 @@
             event.target.classList.add('active');
             generateWeeklyData(month);
         }
-
-        // 초기화
-        window.onload = function() {
-            generateMonthlyTable(3);
-            generateWeeklyData(3);
-            createCharts();
-        };
     </script>
 </body>
 </html>
